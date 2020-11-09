@@ -13,29 +13,40 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 SET='\033[0m'
 
+# Directories
 INS_DIR=/opt/qmi_files          # New directory
 OLD_DIR=/home/$(whoami)/files/quectel-CM   # Old directory
 UDHCPC_DIR=/usr/share/udhcpc
 
-service_name=qmi_reconnect.service
+# service names
+service_reconnect=qmi_reconnect.service
+service_ModemManager = ModemManager
 
 # clean old installation 
-status="$(systemctl is-active $service_name)"
+status_reconnect="$(systemctl is-active $service_reconnect)"
 if ["$status"="active"]; then 
-    systemctl stop $service_name
-    systemctl disable $service_name
+    systemctl stop $service_reconnect
+    systemctl disable $service_reconnect
 fi
 
 if [ -d "$OLD_DIR" ]; then rm -rf /home/$(whoami)/files ; fi # for old directory
 if [ -d "$INS_DIR" ]; then rm -rf $INS_DIR; fi
 
+# Installations
+echo -e "${YELLOW}Installing kernel headers for Raspberry Pi${SET}"
+apt install raspberrypi-kernel-headers
+# For ubuntu it should be 
+#apt install linux-headers-$(uname -r)
+
+echo -e "${YELLOW}Installing udhcpc${SET}"
+apt install udhcpc
+
+# Download and isntall resources
 echo -e "${YELLOW}Create and Change directory to $INS_DIR ${SET}"
 mkdir -p $INS_DIR &&
 pushd $INS_DIR
 
-echo -e "${YELLOW}Downloading Connect Manager${SET}"
-wget https://github.com/sixfab/Sixfab_QMI_Installer/blob/master/src/quectel-CM.zip  #TODO: check link
-unzip quectel-CM.zip -d $INS_DIR && rm -r quectel-CM.zip
+#TODO: Check USB driver and do installation if required
 :'
 echo -e "${YELLOW}Checking Kernel${SET}"
 case $(uname -r) in
@@ -50,25 +61,42 @@ case $(uname -r) in
     5.4*) echo $(uname -r) based kernel contains driver;;
     *) echo "${RED}Driver for $(uname -r) kernel not found${SET}";exit 1;
 esac
-'
-echo -e "${YELLOW}Installing udhcpc${SET}"
-apt install udhcpc
-
-echo -e "${YELLOW}Copying udhcpc default script${SET}"
-mkdir -p $UDHCPC_DIR
-cp $INS_DIR/quectel-CM/default.script $UDHCPC_DIR
-chmod +x $UDHCPC_DIR/default.script
-popd
 
 echo -e "${YELLOW}Change directory to $INS_DIR/drivers${SET}"
 pushd $INS_DIR/drivers
 make && make install
 popd
+'
+        #TODO: Install qmi driver whatsoever
+# write the link here.
+wget -O qmi_wwan.zip 
+unzip qmi_wwan.zip -d $INS_DIR && rm qmi_wwan.zip
+pushd $INS_DIR/qmi_wwan
+make && make install
+popd
 
-echo -e "${YELLOW}Change directory to $INS_DIR/quectel-CM${SET}"
+echo -e "${YELLOW}Downloading Connect Manager${SET}"
+wget https://github.com/sixfab/Sixfab_QMI_Installer/raw/master/src/quectel-CM.zip -O quectel-CM.zip
+unzip quectel-CM.zip && rm quectel-CM.zip
+
+echo -e "${YELLOW}Copying udhcpc default script${SET}"
+mkdir -p $UDHCPC_DIR
+cp $INS_DIR/quectel-CM/default.script $UDHCPC_DIR
+chmod +x $UDHCPC_DIR/default.script
+
+echo -e "${YELLOW}Making $INS_DIR/quectel-CM${SET}"
 pushd $INS_DIR/quectel-CM
 make
 popd
+
+popd
+
+# If ModemManager is isntalled and running, stop it as it will interfere 
+status_modemmanager="$(systemctl is-active $service_ModemManager)"
+if ["$status_modemmanager"="active"]; then 
+    systemctl stop $service_ModemManager
+    systemctl disable $service_ModemManager
+fi
 
 echo -e "${YELLOW}After reboot please follow commands mentioned below${SET}"
 echo -e "${YELLOW}go to $INS_DIR/quectel-CM and run sudo ./quectel-CM -s [YOUR APN] for manual operation${SET}"
