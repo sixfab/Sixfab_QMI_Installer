@@ -12,6 +12,6 @@ Finally run the script to install
 `sudo ./qmi_install.sh`
 
 Once the installation is completed, your Raspberry Pi will reboot.
-After the reboot navigate to **/opt/qmi_files/quctel-CM**
+After the reboot navigate to **/opt/qmi_files/quectel-CM**
 then run 
 `sudo ./quectel-CM -s <yourAPN>`
