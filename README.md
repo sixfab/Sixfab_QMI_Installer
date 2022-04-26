@@ -3,7 +3,7 @@ QMI (wwan0) interface installer for providing internet connection using Quectel 
 
 ## How to install
 First download the installation script 
-`wget https://raw.githubusercontent.com/sixfab/Sixfab_QMI_Installer/master/qmi_install.sh`
+`wget https://raw.githubusercontent.com/sixfab/Sixfab_QMI_Installer/main/qmi_install.sh`
 
 Then change the permission 
 `chmod +x qmi_install.sh`
