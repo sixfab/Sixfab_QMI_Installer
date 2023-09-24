@@ -75,15 +75,18 @@ pushd $INS_DIR
 # fi
 
 echo -e "${YELLOW}Downloading QMI WWAN Driver for Quectel Module${SET}"
-wget https://github.com/sixfab/Sixfab_QMI_Installer/raw/main/src/Quectel_Linux_Android_QMI_WWAN_Driver_V1.2.1.zip -O qmi_wwan.zip 
+wget https://sixfab.com/wp-content/uploads/2023/09/Quectel_Linux_Android_QMI_WWAN_Driver_V1.2.6.zip -O qmi_wwan.zip 
 unzip qmi_wwan.zip -d $INS_DIR && rm qmi_wwan.zip
-pushd $INS_DIR/qmi_wwan_q
+pushd $INS_DIR/
+sed -i 's/ARCH=\${ARCH}//g' Makefile 
 make && make install
 popd
 
 echo -e "${YELLOW}Downloading Connection Manager${SET}"
-wget https://github.com/sixfab/Sixfab_QMI_Installer/raw/main/src/Quectel_QConnectManager_Linux_V1.6.1.zip -O quectel-CM.zip
-unzip quectel-CM.zip -d $INS_DIR && rm quectel-CM.zip
+wget https://sixfab.com/wp-content/uploads/2023/09/Quectel_QConnectManager_Linux_V1.6.5.zip -O quectel-CM.zip
+unzip quectel-CM.zip -d $INS_DIR && rm quectel-CM.zip 
+
+mv $INS_DIR/Quectel_QConnectManager_Linux_V1.6.5/ $INS_DIR/quectel-CM
 
 echo -e "${YELLOW}Copying udhcpc default script${SET}"
 chmod +x $INS_DIR/quectel-CM/default.script
