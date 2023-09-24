@@ -78,6 +78,7 @@ echo -e "${YELLOW}Downloading QMI WWAN Driver for Quectel Module${SET}"
 wget https://sixfab.com/wp-content/uploads/2023/09/Quectel_Linux_Android_QMI_WWAN_Driver_V1.2.6.zip -O qmi_wwan.zip 
 unzip qmi_wwan.zip -d $INS_DIR && rm qmi_wwan.zip
 pushd $INS_DIR/
+sed -i 's/ARCH=\${ARCH}//g' Makefile 
 make && make install
 popd
 
